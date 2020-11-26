@@ -1,0 +1,42 @@
+{
+    "intent": {
+      "id": "i4yc9xiiefi3lysm0jk952wr",
+      "name": "블록 이름"
+    },
+    "userRequest": {
+      "timezone": "Asia/Seoul",
+      "params": {
+        "ignoreMe": "true"
+      },
+      "block": {
+        "id": "i4yc9xiiefi3lysm0jk952wr",
+        "name": "블록 이름"
+      },
+      "utterance": "발화 내용",
+      "lang": null,
+      "user": {
+        "id": "617470",
+        "type": "accountId",
+        "properties": {}
+      }
+    },
+    "bot": {
+      "id": "5fb3228a56aa161baa83d6ae",
+      "name": "봇 이름"
+    },
+    "action": {
+      "name": "3s2pr6xwjt",
+      "clientExtra": null,
+      "params": {
+        "lol_name": "통딜"
+      },
+      "id": "os5wylmk9wdk3dnq3lw8vbn6",
+      "detailParams": {
+        "lol_name": {
+          "origin": "통딜",
+          "value": "통딜",
+          "groupName": ""
+        }
+      }
+    }
+  }
