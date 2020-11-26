@@ -17,6 +17,10 @@ const queue = require("./json-lol/queues.json")
 const info = champions.data
 const posiotionEnName = {탑:"TOP", 정글:"JUNGLE", 미드:"MID", 바텀:"ADC", 원딜:"ADC", 서포터:"SUPPORT", 서폿:"SUPPORT"}
 
+const kakaoEmbed = require('./lib/kakaoEmbed')
+let content = new kakaoEmbed()
+let tmpMsg
+
 const getChampionName = id => {
     for (const [enName, obj] of Object.entries(info)) {
         if(obj.key === ""+id){
@@ -90,21 +94,6 @@ const elapsedTimeFormatter = ctime => {
 
 
 
-let tmpMsg = ""
-
-const responseBody = {
-    version: "2.0",
-    template: {
-        outputs: [
-                {
-                simpleText: {
-                    text: ""
-                }
-            }
-        ]
-    }
-}
-
 const apiRouter = express.Router()
 
 app.use(logger('dev', {}))
@@ -115,14 +104,26 @@ app.use(bodyParser.urlencoded({
 
 app.use('/api', apiRouter)
 
+apiRouter.post('/guide', function(req, res) {
+
+    content = new kakaoEmbed()
+    content.addText('메뉴에서 원하는 기능을 선택해주세요')
+    .addQuickReplies('날씨', { action: 'message', messageText: '날씨를 알려주세요.' })
+    .addQuickReplies('뉴스', { action: 'block', messageText: '뉴스를 알려드릴께요', 'blockId': '블록 아이디' })
+
+    res.status(200).send(content.output())
+
+})
+
 apiRouter.post('/getTier', function(req, res) {
 
     const name = req.body.action.params.lol_name
     
     if(typeof name === "undefined"){
 
-        responseBody.template.outputs[0].simpleText.text = autoMessage["bad-input"]
-        res.status(401).send(responseBody)
+        content = new kakaoEmbed()
+        content.addText(autoMessage["bad-input"])
+        res.status(401).send(content.output())
         
     }
 
@@ -149,8 +150,10 @@ apiRouter.post('/getTier', function(req, res) {
                     if(league_obj.findIndex(obj => obj.queueType === "RANKED_SOLO_5x5") === -1){
 
                         console.log("티어 => " + autoMessage["only-rank"])
-                        responseBody.template.outputs[0].simpleText.text = autoMessage["only-rank"]
-                        res.status(200).send(responseBody)
+                        
+                        content = new kakaoEmbed()
+                        content.addText(autoMessage["only-rank"])
+                        res.status(200).send(content.output())
                         
                     }
 
@@ -162,8 +165,9 @@ apiRouter.post('/getTier', function(req, res) {
                             tmpMsg += `티어 : ${item.tier} ${item.rank} ${item.leaguePoints}pt\n`
                             tmpMsg += `전적 : ${item.wins}승 ${item.losses}패 (${Math.round(100*item.wins/(item.wins+item.losses))}%)`
 
-                            responseBody.template.outputs[0].simpleText.text = tmpMsg
-                            res.status(200).send(responseBody)
+                            content = new kakaoEmbed()
+                            content.addText(tmpMsg)
+                            res.status(200).send(content.output())
 
                         }
                     })
@@ -172,8 +176,9 @@ apiRouter.post('/getTier', function(req, res) {
                     
                     console.log("티어 => " + autoMessage["non-info"])
 
-                    responseBody.template.outputs[0].simpleText.text = autoMessage["non-info"]
-                    res.status(401).send(responseBody)
+                    content = new kakaoEmbed()
+                    content.addText(autoMessage["non-info"])
+                    res.status(401).send(content.output())
 
                 }
 
@@ -181,8 +186,10 @@ apiRouter.post('/getTier', function(req, res) {
 
         }else{
 
-            responseBody.template.outputs[0].simpleText.text = autoMessage["bad-input"]
-            res.status(401).send(responseBody)
+            content = new kakaoEmbed()
+            content.addText(autoMessage["bad-input"])
+            res.status(401).send(content.output())
+
         }
 
     })
