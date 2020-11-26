@@ -14,8 +14,6 @@ const autoMessage = require("./auto-message.json")
 const champions = require("./json-lol/champions.json")
 const queue = require("./json-lol/queues.json")
 
-const example = require("./example.json")
-
 const info = champions.data
 const posiotionEnName = {탑:"TOP", 정글:"JUNGLE", 미드:"MID", 바텀:"ADC", 원딜:"ADC", 서포터:"SUPPORT", 서폿:"SUPPORT"}
 
@@ -92,16 +90,7 @@ const elapsedTimeFormatter = ctime => {
 
 
 
-const apiRouter = express.Router()
-
-app.use(logger('dev', {}))
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({
-  extended: true
-}))
-
-app.use('/api', apiRouter)
-
+let tmpMsg = ""
 
 const responseBody = {
     version: "2.0",
@@ -116,10 +105,26 @@ const responseBody = {
     }
 }
 
+const apiRouter = express.Router()
+
+app.use(logger('dev', {}))
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({
+  extended: true
+}))
+
+app.use('/api', apiRouter)
+
 apiRouter.post('/getTier', function(req, res) {
 
-    const name = example.action.params.lol_name
-    console.log(res)
+    const name = req.body.action.params.lol_name
+    
+    if(typeof name === "undefined"){
+
+        responseBody.template.outputs[0].simpleText.text = autoMessage["bad-input"]
+        res.status(401).send(responseBody)
+        
+    }
 
     request(`${keys.riotUrl}/summoner/v4/summoners/by-name/${urlencode(name)}?api_key=${keys.riotAPI}`, (error, response, body) => {
 
@@ -151,10 +156,11 @@ apiRouter.post('/getTier', function(req, res) {
 
                     league_obj.forEach(item => {
                         if(item.queueType === "RANKED_SOLO_5x5"){
-
+                            
+                            tmpMsg = ""
                             tmpMsg += `소환사명 : ${item.summonerName}\n`
                             tmpMsg += `티어 : ${item.tier} ${item.rank} ${item.leaguePoints}pt\n`
-                            tmpMsg += `${item.wins}승 ${item.losses}패 (${Math.round(100*item.wins/(item.wins+item.losses))}%)`
+                            tmpMsg += `전적 : ${item.wins}승 ${item.losses}패 (${Math.round(100*item.wins/(item.wins+item.losses))}%)`
 
                             responseBody.template.outputs[0].simpleText.text = tmpMsg
                             res.status(200).send(responseBody)
@@ -167,12 +173,16 @@ apiRouter.post('/getTier', function(req, res) {
                     console.log("티어 => " + autoMessage["non-info"])
 
                     responseBody.template.outputs[0].simpleText.text = autoMessage["non-info"]
-                    res.status(200).send(responseBody)
+                    res.status(401).send(responseBody)
 
                 }
 
             })
 
+        }else{
+
+            responseBody.template.outputs[0].simpleText.text = autoMessage["bad-input"]
+            res.status(401).send(responseBody)
         }
 
     })
