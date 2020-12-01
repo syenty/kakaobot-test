@@ -44,6 +44,22 @@ apiRouter.post('/guide', function(req, res) {
     .addQuickReplies("전적 검색",{action: "message", messageText: "전적"})
 
     res.status(200).send(content.output())
+    return
+
+})
+
+apiRouter.post('/fail', function(req, res) {
+
+    let content1 = new kakaoEmbed
+    let content2 = new kakaoEmbed
+
+    content2.addText("원하는 기능을 선택해주세요")
+    .addQuickReplies("티어 검색",{action: "message", messageText: "티어"})
+    .addQuickReplies("유저 관전",{action: "message", messageText: "관전"})
+    .addQuickReplies("전적 검색",{action: "message", messageText: "전적"})
+
+    res.status(200).send(content1.addText("이해하기 어려워요").output()).send(content2.output())
+    return
 
 })
 
