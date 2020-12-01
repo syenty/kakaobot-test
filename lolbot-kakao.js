@@ -315,7 +315,10 @@ apiRouter.post('/getRecord', function(req, res) {
                         if(typeof queueId === "undefined"){
 
                             console.log("전적, 큐타입 입력 => " + autoMessage["bad-input"])
-                            res.status(200).send(autoMessage["bad-input"])
+
+                            content = new kakaoEmbed
+                            content.addText(autoMessage["bad-input"])
+                            res.status(200).send(content.output())
                             return
                             
                         }
@@ -329,7 +332,10 @@ apiRouter.post('/getRecord', function(req, res) {
                         if(typeof championId === "undefined"){
 
                             console.log("전적, 챔피언명 입력 => " + autoMessage["bad-input"])
-                            res.status(200).send(autoMessage["bad-input"])
+
+                            content = new kakaoEmbed
+                            content.addText(autoMessage["bad-input"])
+                            res.status(200).send(content.output())
                             return
                             
                         }
@@ -346,7 +352,10 @@ apiRouter.post('/getRecord', function(req, res) {
                     if(typeof championId === "undefined"){
 
                         console.log("전적, 챔피언명 입력 => " + autoMessage["bad-input"])
-                        res.status(200).send(autoMessage["bad-input"])
+
+                        content = new kakaoEmbed
+                        content.addText(autoMessage["bad-input"])
+                        res.status(200).send(content.output())
                         return
 
                     }
@@ -355,10 +364,12 @@ apiRouter.post('/getRecord', function(req, res) {
 
                     // 잘못된 게임 종류 입력시
                     if(typeof queueId === "undefined"){
-
                         
                         console.log("전적, 큐타입 입력 => " + autoMessage["bad-input"])
-                        res.status(200).send(autoMessage["bad-input"])
+
+                        content = new kakaoEmbed
+                        content.addText(autoMessage["bad-input"])
+                        res.status(200).send(content.output())
                         return
                     }
 
@@ -367,7 +378,10 @@ apiRouter.post('/getRecord', function(req, res) {
                 }else{
 
                     console.log("전적 => " + autoMessage["bad-input"])
-                    res.status(200).send(autoMessage["bad-input"])
+
+                    content = new kakaoEmbed
+                    content.addText(autoMessage["bad-input"])
+                    res.status(200).send(content.output())
                     return
 
                 }
@@ -389,7 +403,10 @@ apiRouter.post('/getRecord', function(req, res) {
                             resolve(JSON.parse(body).matches)
                         }else{
                             console.log("전적.검색실패 => " + autoMessage["non-info"])
-                            res.status(200).send(autoMessage["non-info"])
+
+                            content = new kakaoEmbed
+                            content.addText(autoMessage["non-info"])
+                            res.status(200).send(content.output())
                             return
                         }
                     })
@@ -477,7 +494,8 @@ apiRouter.post('/getRecord', function(req, res) {
         
                                         objArr.forEach(item => {
                                             if(item.cnt > 0){
-        
+                                                
+                                                tmpMsg = ""
                                                 tmpMsg += `${convertUtil.getQueueType(item.queueType)}\n`
                                                 tmpMsg += `${item.win}승 ${item.losses}패 (${Math.floor(100*item.win/(item.win+item.losses))}%)\n`
         
@@ -502,19 +520,28 @@ apiRouter.post('/getRecord', function(req, res) {
                                             }
                                         })
                                         
-                                        res.status(200).send(tmpMsg)
+                                        content = new kakaoEmbed
+                                        content.addText(tmpMsg)
+                                        res.status(200).send(content.output())
                                         return
                                     }
         
                                 }else if(response.statusCode){
 
                                     console.log("전적.검색 => " + autoMessage["limit-exceeded"])
-                                    res.status(200).send(autoMessage["limit-exceeded"])
+
+                                    content = new kakaoEmbed
+                                    content.addText(autoMessage["limit-exceeded"])
+                                    res.status(200).send(content.output())
                                     return
+
                                 }else{
 
                                     console.log("전적.검색 => " + autoMessage["non-info"])
-                                    res.status(200).send(autoMessage["non-info"])
+                                    
+                                    content = new kakaoEmbed
+                                    content.addText(autoMessage["non-info"])
+                                    res.status(200).send(content.output())
                                     return
                                 }
         
@@ -525,19 +552,17 @@ apiRouter.post('/getRecord', function(req, res) {
                         if(matches_obj.length === 0){
                             
                             console.log("전적.검색.결과 => " + autoMessage["non-info"])
-                            res.status(200).send(autoMessage["non-info"])
+                                    
+                            content = new kakaoEmbed
+                            content.addText(autoMessage["non-info"])
+                            res.status(200).send(content.output())
                             return
 
                         }
         
                     },1500)
+
                 })
-        
-                content = new kakaoEmbed
-                content.addText(tmpMsg)
-                res.status(200).send(content.output())
-        
-                return
 
             }
 
