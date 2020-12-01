@@ -16,10 +16,8 @@ const emblems = require("./json-lol/emblems.json")
 
 // require util class
 const kakaoEmbed = require('./lib/kakaoEmbed')
-const convertUtil = require('./lib/convertUtil')
-
-
-
+const ConvertUtil = require('./lib/convertUtil')
+const convertUtil = new ConvertUtil
 
 let tmpMsg
 let content
@@ -195,13 +193,13 @@ apiRouter.post('/getSpectator', function(req, res) {
                     let blue_obj = {teamId:100,isAlly:false,teamArr:[]}
                     let red_obj = {teamId:200,isAlly:false,teamArr:[]}
 
-                    tmpMsg += `${getQueueType(spectator_obj.gameQueueConfigId)} ${elapsedTimeFormatter(new Date().getTime()-spectator_obj.gameStartTime)} 진행중\n`
+                    tmpMsg += `${convertUtil.getQueueType(spectator_obj.gameQueueConfigId)} ${convertUtil.elapsedTimeFormatter(new Date().getTime()-spectator_obj.gameStartTime)} 진행중\n`
 
                     spectator_obj.participants.forEach(item => {
                         if(item.teamId === 100){   
-                            blue_obj.teamArr.push(`${item.summonerName} (${getChampionName(item.championId)}) ${item.kill}`)
+                            blue_obj.teamArr.push(`${item.summonerName} (${convertUtil.getChampionName(item.championId)}) ${item.kill}`)
                         }else if(item.teamId === 200){
-                            red_obj.teamArr.push(`${item.summonerName} (${getChampionName(item.championId)})`)
+                            red_obj.teamArr.push(`${item.summonerName} (${convertUtil.getChampionName(item.championId)})`)
                         }
                         if(item.summonerId === id) {
                             if(item.teamId===100){
@@ -312,7 +310,7 @@ apiRouter.post('/getRecord', function(req, res) {
                     // 닉네임 + (큐타입 or 챔피언명) 입력시
                     if(typeof param1 !== "undefined" && (param1 === "솔랭" || param1 === "일반" || param1 === "자랭" || param1 === "칼바람")){
         
-                        const queueId = getQueueId(param1)
+                        const queueId = convertUtil.getQueueId(param1)
                         // 잘못된 게임 종류 입력시
                         if(typeof queueId === "undefined"){
 
@@ -326,7 +324,7 @@ apiRouter.post('/getRecord', function(req, res) {
         
                     }else{
 
-                        const championId = getChampionId(param1)
+                        const championId = convertUtil.getChampionId(param1)
                         // 잘못된 챔피언 이름 입력시
                         if(typeof championId === "undefined"){
 
@@ -342,7 +340,7 @@ apiRouter.post('/getRecord', function(req, res) {
                 }else if(content.length === 3){
 
                     // 게임 종류 입력시
-                    const championId = getChampionId(param1)
+                    const championId = convertUtil.getChampionId(param1)
 
                     // 잘못된 챔피언 이름 입력시
                     if(typeof championId === "undefined"){
@@ -353,7 +351,7 @@ apiRouter.post('/getRecord', function(req, res) {
 
                     }
                     
-                    const queueId = getQueueId(param2)
+                    const queueId = convertUtil.getQueueId(param2)
 
                     // 잘못된 게임 종류 입력시
                     if(typeof queueId === "undefined"){
@@ -458,8 +456,8 @@ apiRouter.post('/getRecord', function(req, res) {
                                                             objArr[objIdx].kill+=stats.kills
                                                             objArr[objIdx].death+=stats.deaths
                                                             objArr[objIdx].assist+=stats.assists
-                                                            objArr[objIdx].damageInTeam+=getDealtRank(matchDetail,participantId,false)
-                                                            objArr[objIdx].damageInAll+=getDealtRank(matchDetail,participantId,true)
+                                                            objArr[objIdx].damageInTeam+=convertUtil.getDealtRank(matchDetail,participantId,false)
+                                                            objArr[objIdx].damageInAll+=convertUtil.getDealtRank(matchDetail,participantId,true)
         
                                                         }
         
@@ -480,12 +478,12 @@ apiRouter.post('/getRecord', function(req, res) {
                                         objArr.forEach(item => {
                                             if(item.cnt > 0){
         
-                                                tmpMsg += `${getQueueType(item.queueType)}\n`
+                                                tmpMsg += `${convertUtil.getQueueType(item.queueType)}\n`
                                                 tmpMsg += `${item.win}승 ${item.losses}패 (${Math.floor(100*item.win/(item.win+item.losses))}%)\n`
         
                                                 // 사용한 챔피언
                                                 const res = item.champions.reduce((acc, championId) => {
-                                                    acc[getChampionName(championId)] = (acc[getChampionName(championId)] || 0) + 1
+                                                    acc[convertUtil.getChampionName(championId)] = (acc[convertUtil.getChampionName(championId)] || 0) + 1
                                                     return acc
                                                 },{})
                                                 let championLog = ""
