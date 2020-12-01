@@ -263,7 +263,7 @@ apiRouter.post('/getRecord', function(req, res) {
 
     if(objectArr.length === 0 || objectArr.length > 3){
 
-        console.log("전적 => " + autoMessage["bad-input"])
+        console.log("전적. 공백 에러 => " + autoMessage["bad-input"])
 
         content = new kakaoEmbed
         content.addText(autoMessage["bad-input"])
@@ -305,7 +305,7 @@ apiRouter.post('/getRecord', function(req, res) {
                     // 닉네임만 입력시
                     requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
         
-                }else if(content.length === 2){
+                }else if(objectArr.length === 2){
 
                     // 닉네임 + (큐타입 or 챔피언명) 입력시
                     if(typeof param1 !== "undefined" && (param1 === "솔랭" || param1 === "일반" || param1 === "자랭" || param1 === "칼바람")){
@@ -343,7 +343,7 @@ apiRouter.post('/getRecord', function(req, res) {
                         requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?champion=${championId}&endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
                     }
         
-                }else if(content.length === 3){
+                }else if(objectArr.length === 3){
 
                     // 게임 종류 입력시
                     const championId = convertUtil.getChampionId(param1)
@@ -377,7 +377,7 @@ apiRouter.post('/getRecord', function(req, res) {
 
                 }else{
 
-                    console.log("전적 => " + autoMessage["bad-input"])
+                    console.log("전적. 공백 에러 => " + autoMessage["bad-input"])
 
                     content = new kakaoEmbed
                     content.addText(autoMessage["bad-input"])
@@ -487,16 +487,17 @@ apiRouter.post('/getRecord', function(req, res) {
                                         })
         
                                     }
-        
+                                    
                                     // 모든 게임 검색 후 종합한 데이터 가공
                                     if(count === 0){
+
                                         //console.log(objArr)
+                                        tmpMsg = ""
         
                                         objArr.forEach(item => {
                                             if(item.cnt > 0){
                                                 
-                                                tmpMsg = ""
-                                                tmpMsg += `${convertUtil.getQueueType(item.queueType)}\n`
+                                                tmpMsg += `\n${convertUtil.getQueueType(item.queueType)}\n`
                                                 tmpMsg += `${item.win}승 ${item.losses}패 (${Math.floor(100*item.win/(item.win+item.losses))}%)\n`
         
                                                 // 사용한 챔피언
@@ -515,7 +516,7 @@ apiRouter.post('/getRecord', function(req, res) {
                                                 tmpMsg += `사용한 챔피언 : ${championLog}\n`
         
                                                 tmpMsg += `K/D/A : ${item.kill}/${item.death}/${item.assist} (${((item.kill+item.assist)/(item.death === 0 ? 1/1.2 : item.death)).toFixed(2)})\n`
-                                                tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등`
+                                                tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등\n`
         
                                             }
                                         })
