@@ -8,10 +8,15 @@ const request = require('request')
 // npm install urlencode
 const urlencode = require('urlencode')
 
+// require util json
+const keys = require("./keys.json")
+const autoMessage = require("./auto-message.json")
+
+const emblems = require("./json-lol/emblems.json")
+
 // require util class
 const kakaoEmbed = require('./lib/kakaoEmbed')
 const convertUtil = require('./lib/convertUtil')
-
 
 
 
@@ -91,7 +96,7 @@ apiRouter.post('/getTier', function(req, res) {
                             content.addBasicCard()
                             .setCardTitle(item.summonerName)
                             .setCardDescription(`${item.tier} ${item.rank} ${item.leaguePoints}pt\n${item.wins}승 ${item.losses}패 (${Math.round(100*item.wins/(item.wins+item.losses))}%)`)
-                            .setCardThumbnail(`./images-lol/ranked-emblems/emblem_${item.tier.toLowerCase()}.png`)
+                            .setCardThumbnail(emblems[`${item.tier.toLowerCase()}`])
                             res.status(200).send(content.output())
                             return
 
