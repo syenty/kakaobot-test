@@ -34,6 +34,19 @@ app.use(bodyParser.urlencoded({
 
 app.use('/api', apiRouter)
 
+apiRouter.post('/guide', function(req, res) {
+
+    content = new kakaoEmbed
+
+    content.addText("원하는 기능을 선택해주세요")
+    .addQuickReplies("티어 검색",{action: "message", messageText: "티어"})
+    .addQuickReplies("유저 관전",{action: "message", messageText: "관전"})
+    .addQuickReplies("전적 검색",{action: "message", messageText: "전적"})
+
+    res.status(200).send(content.output())
+
+})
+
 apiRouter.post('/getTier', function(req, res) {
 
     const name = req.body.action.params.lol_name
