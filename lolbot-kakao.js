@@ -274,255 +274,276 @@ apiRouter.post('/getRecord', function(req, res) {
 
     }else{
 
-        let lol_name
-        let champion_name
-        let queue_type
+        let name
+        let param1 // 챔피언 or 큐타입
+        let param2 // 큐타입
 
         if(objectArr.length >= 1){
-            lol_name=objectArr[0]
+            name=objectArr[0]
         }
         if(objectArr.length >= 2){
-            champion_name=objectArr[1]
+            param1=objectArr[1]
         }
         if(objectArr.length === 3){
-            queue_type = objectArr[2]
+            param2=objectArr[2]
         }
+    
+        request(`${keys.riotUrl}/summoner/v4/summoners/by-name/${urlencode(name)}?api_key=${keys.riotAPI}`, (error, response, body) => {
+    
+            if(error) throw error
+    
+            // 정상적인 입력시
+            if(response.statusCode === 200){
+    
+                const summoner_obj = JSON.parse(body)
+    
+                const id = summoner_obj["id"]
+                const accountId = summoner_obj["accountId"]
 
-        tmpMsg = ""
-        tmpMsg += `lol_name : ${lol_name}\n`
-        tmpMsg += `champion_name : ${champion_name}\n`
-        tmpMsg += `queue_type : ${queue_type}`
+                let requestUrl
 
-        console.log(tmpMsg)
+                if(objectArr.length === 1){
 
-        let requestUrl
-
-        if(objectArr.length === 1){
-            // 닉네임만 입력시
-            requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
-
-        }else if(content.length === 2){
-            // 닉네임, 챔피언명 입력시
-
-            if(content[3] === "솔랭" || content[3] === "일반" || content[3] === "자랭" || content[3] === "칼바람"){
-
-                const queueId = getQueueId(content[3])
-                // 잘못된 게임 종류 입력시
-                if(typeof queueId === "undefined"){
-                    console.log(autoMessage["bad-input"])
-
-                    msg.author.send(autoMessage["bad-input"])
-                    // return msg.reply(autoMessage["bad-input"])
-                }
-                requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?queue=${queueId}&endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
-
-            }else{
-                const championId = getChampionId(content[3])
-                // 잘못된 챔피언 이름 입력시
-                if(typeof championId === "undefined"){
-                    console.log(autoMessage["bad-input"])
-
-                    msg.author.send(autoMessage["bad-input"])
-                    // return msg.reply(autoMessage["bad-input"])
-                }
-                requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?champion=${championId}&endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
-            }
-
-        }else if(content.length === 5){
-            // 게임 종류 입력시
-
-            const championId = getChampionId(content[3])
-            // 잘못된 챔피언 이름 입력시
-            if(typeof championId === "undefined"){
-                console.log(autoMessage["bad-input"])
-                
-                msg.author.send(autoMessage["bad-input"])
-                // return msg.reply(autoMessage["bad-input"])
-            }
-            
-            const queueId = getQueueId(content[4])
-            // 잘못된 게임 종류 입력시
-            if(typeof queueId === "undefined"){
-                console.log(autoMessage["bad-input"])
-
-                msg.author.send(autoMessage["bad-input"])
-                // return msg.reply(autoMessage["bad-input"])
-            }
-            requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?champion=${championId}&queue=${queueId}&endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
-        }else{
-            console.log("전적 => " + autoMessage["bad-input"])
-
-            msg.author.send(autoMessage["bad-input"])
-            // return msg.reply(autoMessage["bad-input"])
-        }
-
-        const refObj = {cnt:0,win:0,losses:0,kill:0,death:0,assist:0,damageInTeam:0,damageInAll:0}
-        let objArr = [
-                        {queueType:420,champions:[], ...refObj},
-                        {queueType:430,champions:[], ...refObj},
-                        {queueType:440,champions:[], ...refObj},
-                        {queueType:450,champions:[], ...refObj}
-                    ]
+                    // 닉네임만 입력시
+                    requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
         
-        // 전적 검색 시작
-        const getMatchData = new Promise((resolve, reject) => {
-            request(requestUrl, (error, response, body) => {
-                if(error) throw error
-                if(response.statusCode === 200){
-                    // const matches_obj = JSON.parse(body).matches
-                    resolve(JSON.parse(body).matches)
-                }else{
-                    console.log("전적.검색실패 => " + autoMessage["non-info"])
+                }else if(content.length === 2){
 
-                    msg.author.send(autoMessage["non-info"])
-                    // return msg.reply(autoMessage["non-info"])
-                }
-            })
-        })
+                    // 닉네임 + (큐타입 or 챔피언명) 입력시
+                    if(typeof param1 !== "undefined" && (param1 === "솔랭" || param1 === "일반" || param1 === "자랭" || param1 === "칼바람")){
+        
+                        const queueId = getQueueId(param1)
+                        // 잘못된 게임 종류 입력시
+                        if(typeof queueId === "undefined"){
 
-        getMatchData.then(matchData => {
-
-            setTimeout(() => {
-
-                const matches_obj = matchData
-
-                // 검색한 게임 수
-                let count = matches_obj.length
-                console.log(`게임 수 : ${count}`)
-
-                let gameId
-
-                matches_obj.forEach(item => {
-
-                    gameId = item.gameId
-
-                    requestUrl = `${keys.riotUrl}/match/v4/matches/${gameId}?api_key=${keys.riotAPI}`
-
-                    request(requestUrl, (error, response, body) => {
-
-                        if(error) throw error
-
-                        if(response.statusCode === 200){
-
-                            const matchDetail = JSON.parse(body)
-
-                            count--
-
-                            // 솔랭, 일반, 자랭, 칼바람 일때만 집계
-                            if(matchDetail.queueId === 420 || matchDetail.queueId === 430 || matchDetail.queueId === 440 || matchDetail.queueId === 450){
-
-                                matchDetail.participantIdentities.forEach(item => {
-
-                                    if(item.player.summonerId === id){
-
-                                        const participantId = item.participantId
-
-                                        const selectedQueueId = (obj) => obj.queueType === matchDetail.queueId
-                                        let objIdx
-
-                                        matchDetail.participants.forEach(item => {
-
-                                            if(item.participantId === participantId){
-
-                                                objIdx = objArr.findIndex(selectedQueueId)
-
-                                                if(objIdx > -1){
-
-                                                    const stats = item.stats
-
-                                                    objArr[objIdx].cnt++
-                                                    objArr[objIdx].champions.push(item.championId)
-                                                    if(stats.win){
-                                                        objArr[objIdx].win++
-                                                    }else{
-                                                        objArr[objIdx].losses++
-                                                    }
-                                                    
-                                                    objArr[objIdx].kill+=stats.kills
-                                                    objArr[objIdx].death+=stats.deaths
-                                                    objArr[objIdx].assist+=stats.assists
-                                                    objArr[objIdx].damageInTeam+=getDealtRank(matchDetail,participantId,false)
-                                                    objArr[objIdx].damageInAll+=getDealtRank(matchDetail,participantId,true)
-
-                                                }
-
-                                            }
-
-                                        })
-
-                                    }
-
-                                })
-
-                            }
-
-                            // 모든 게임 검색 후 종합한 데이터 가공
-                            if(count === 0){
-                                //console.log(objArr)
-
-                                objArr.forEach(item => {
-                                    if(item.cnt > 0){
-
-                                        tmpMsg += `${getQueueType(item.queueType)}\n`
-                                        tmpMsg += `${item.win}승 ${item.losses}패 (${Math.floor(100*item.win/(item.win+item.losses))}%)\n`
-
-                                        // 사용한 챔피언
-                                        const res = item.champions.reduce((acc, championId) => {
-                                            acc[getChampionName(championId)] = (acc[getChampionName(championId)] || 0) + 1
-                                            return acc
-                                        },{})
-                                        let championLog = ""
-                                        Object.entries(res).forEach(([name, cnt], index) => {
-                                            if(index === Object.keys(res).length-1){
-                                                championLog += `${name} ${cnt}`
-                                            }else{
-                                                championLog += `${name} ${cnt}, `
-                                            }
-                                        })
-                                        tmpMsg += `사용한 챔피언 : ${championLog}\n`
-
-                                        tmpMsg += `K/D/A : ${item.kill}/${item.death}/${item.assist} (${((item.kill+item.assist)/(item.death === 0 ? 1/1.2 : item.death)).toFixed(2)})\n`
-                                        tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등\n`
-                                        tmpMsg += '\n'
-
-                                    }
-                                })
-
-                                msg.author.send(tmpMsg)
-                                // return msg.reply(tmpMsg)
-                            }
-
-                        }else if(response.statusCode){
-                            console.log("전적.검색 => " + autoMessage["limit-exceeded"])
-
-                            msg.author.send(autoMessage["limit-exceeded"])
-                            // return msg.reply(autoMessage["limit-exceeded"])
-                        }else{
-                            console.log("전적.검색 => " + autoMessage["non-info"])
-
-                            msg.author.send(autoMessage["non-info"])
-                            // return msg.reply(autoMessage["non-info"])
+                            console.log("전적, 큐타입 입력 => " + autoMessage["bad-input"])
+                            res.status(200).send(autoMessage["bad-input"])
+                            return
+                            
                         }
 
-                    })
+                        requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?queue=${queueId}&endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
+        
+                    }else{
 
-                })
+                        const championId = getChampionId(param1)
+                        // 잘못된 챔피언 이름 입력시
+                        if(typeof championId === "undefined"){
 
-                if(matches_obj.length === 0){
-                    console.log("전적.검색.결과 => " + autoMessage["non-info"])
+                            console.log("전적, 챔피언명 입력 => " + autoMessage["bad-input"])
+                            res.status(200).send(autoMessage["bad-input"])
+                            return
+                            
+                        }
 
-                    msg.author.send(autoMessage["non-info"])
-                    // return msg.reply(autoMessage["non-info"])
+                        requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?champion=${championId}&endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
+                    }
+        
+                }else if(content.length === 3){
+
+                    // 게임 종류 입력시
+                    const championId = getChampionId(param1)
+
+                    // 잘못된 챔피언 이름 입력시
+                    if(typeof championId === "undefined"){
+
+                        console.log("전적, 챔피언명 입력 => " + autoMessage["bad-input"])
+                        res.status(200).send(autoMessage["bad-input"])
+                        return
+
+                    }
+                    
+                    const queueId = getQueueId(param2)
+
+                    // 잘못된 게임 종류 입력시
+                    if(typeof queueId === "undefined"){
+
+                        
+                        console.log("전적, 큐타입 입력 => " + autoMessage["bad-input"])
+                        res.status(200).send(autoMessage["bad-input"])
+                        return
+                    }
+
+                    requestUrl = `${keys.riotUrl}/match/v4/matchlists/by-account/${accountId}?champion=${championId}&queue=${queueId}&endIndex=20&beginIndex=0&api_key=${keys.riotAPI}`
+
+                }else{
+
+                    console.log("전적 => " + autoMessage["bad-input"])
+                    res.status(200).send(autoMessage["bad-input"])
+                    return
+
                 }
+        
+                const refObj = {cnt:0,win:0,losses:0,kill:0,death:0,assist:0,damageInTeam:0,damageInAll:0}
+                let objArr = [
+                                {queueType:420,champions:[], ...refObj},
+                                {queueType:430,champions:[], ...refObj},
+                                {queueType:440,champions:[], ...refObj},
+                                {queueType:450,champions:[], ...refObj}
+                            ]
+                
+                // 전적 검색 시작
+                const getMatchData = new Promise((resolve, reject) => {
+                    request(requestUrl, (error, response, body) => {
+                        if(error) throw error
+                        if(response.statusCode === 200){
+                            // const matches_obj = JSON.parse(body).matches
+                            resolve(JSON.parse(body).matches)
+                        }else{
+                            console.log("전적.검색실패 => " + autoMessage["non-info"])
+                            res.status(200).send(autoMessage["non-info"])
+                            return
+                        }
+                    })
+                })
+        
+                getMatchData.then(matchData => {
+        
+                    setTimeout(() => {
+        
+                        const matches_obj = matchData
+        
+                        // 검색한 게임 수
+                        let count = matches_obj.length
+                        console.log(`게임 수 : ${count}`)
+        
+                        let gameId
+        
+                        matches_obj.forEach(item => {
+        
+                            gameId = item.gameId
+        
+                            requestUrl = `${keys.riotUrl}/match/v4/matches/${gameId}?api_key=${keys.riotAPI}`
+        
+                            request(requestUrl, (error, response, body) => {
+        
+                                if(error) throw error
+        
+                                if(response.statusCode === 200){
+        
+                                    const matchDetail = JSON.parse(body)
+        
+                                    count--
+        
+                                    // 솔랭, 일반, 자랭, 칼바람 일때만 집계
+                                    if(matchDetail.queueId === 420 || matchDetail.queueId === 430 || matchDetail.queueId === 440 || matchDetail.queueId === 450){
+        
+                                        matchDetail.participantIdentities.forEach(item => {
+        
+                                            if(item.player.summonerId === id){
+        
+                                                const participantId = item.participantId
+        
+                                                const selectedQueueId = (obj) => obj.queueType === matchDetail.queueId
+                                                let objIdx
+        
+                                                matchDetail.participants.forEach(item => {
+        
+                                                    if(item.participantId === participantId){
+        
+                                                        objIdx = objArr.findIndex(selectedQueueId)
+        
+                                                        if(objIdx > -1){
+        
+                                                            const stats = item.stats
+        
+                                                            objArr[objIdx].cnt++
+                                                            objArr[objIdx].champions.push(item.championId)
+                                                            if(stats.win){
+                                                                objArr[objIdx].win++
+                                                            }else{
+                                                                objArr[objIdx].losses++
+                                                            }
+                                                            
+                                                            objArr[objIdx].kill+=stats.kills
+                                                            objArr[objIdx].death+=stats.deaths
+                                                            objArr[objIdx].assist+=stats.assists
+                                                            objArr[objIdx].damageInTeam+=getDealtRank(matchDetail,participantId,false)
+                                                            objArr[objIdx].damageInAll+=getDealtRank(matchDetail,participantId,true)
+        
+                                                        }
+        
+                                                    }
+        
+                                                })
+        
+                                            }
+        
+                                        })
+        
+                                    }
+        
+                                    // 모든 게임 검색 후 종합한 데이터 가공
+                                    if(count === 0){
+                                        //console.log(objArr)
+        
+                                        objArr.forEach(item => {
+                                            if(item.cnt > 0){
+        
+                                                tmpMsg += `${getQueueType(item.queueType)}\n`
+                                                tmpMsg += `${item.win}승 ${item.losses}패 (${Math.floor(100*item.win/(item.win+item.losses))}%)\n`
+        
+                                                // 사용한 챔피언
+                                                const res = item.champions.reduce((acc, championId) => {
+                                                    acc[getChampionName(championId)] = (acc[getChampionName(championId)] || 0) + 1
+                                                    return acc
+                                                },{})
+                                                let championLog = ""
+                                                Object.entries(res).forEach(([name, cnt], index) => {
+                                                    if(index === Object.keys(res).length-1){
+                                                        championLog += `${name} ${cnt}`
+                                                    }else{
+                                                        championLog += `${name} ${cnt}, `
+                                                    }
+                                                })
+                                                tmpMsg += `사용한 챔피언 : ${championLog}\n`
+        
+                                                tmpMsg += `K/D/A : ${item.kill}/${item.death}/${item.assist} (${((item.kill+item.assist)/(item.death === 0 ? 1/1.2 : item.death)).toFixed(2)})\n`
+                                                tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등`
+        
+                                            }
+                                        })
+                                        
+                                        res.status(200).send(tmpMsg)
+                                        return
+                                    }
+        
+                                }else if(response.statusCode){
 
-            },1500)
+                                    console.log("전적.검색 => " + autoMessage["limit-exceeded"])
+                                    res.status(200).send(autoMessage["limit-exceeded"])
+                                    return
+                                }else{
+
+                                    console.log("전적.검색 => " + autoMessage["non-info"])
+                                    res.status(200).send(autoMessage["non-info"])
+                                    return
+                                }
+        
+                            })
+        
+                        })
+        
+                        if(matches_obj.length === 0){
+                            
+                            console.log("전적.검색.결과 => " + autoMessage["non-info"])
+                            res.status(200).send(autoMessage["non-info"])
+                            return
+
+                        }
+        
+                    },1500)
+                })
+        
+                content = new kakaoEmbed
+                content.addText(tmpMsg)
+                res.status(200).send(content.output())
+        
+                return
+
+            }
+
         })
-
-        content = new kakaoEmbed
-        content.addText(tmpMsg)
-        res.status(200).send(content.output())
-
-        return
 
     }
 
