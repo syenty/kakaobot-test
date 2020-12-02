@@ -1,0 +1,17 @@
+{
+  "name": "docker_web_app",
+  "version": "1.0.0",
+  "description": "lolbot-kakao.js on Docker",
+  "author": "syenty <tog1993@naver.com>",
+  "main": "lolbot-kakao.js",
+  "scripts": {
+    "start": "node lolbot-kakao.js"
+  },
+  "dependencies": {
+    "express": "4.17.1",
+    "morgan": "1.10.0",
+    "body-parser": "1.19.0",
+    "request": "2.88.2",
+    "urlencode": "1.1.0"
+  }
+}
