@@ -543,7 +543,7 @@ apiRouter.post('/getRecord', function(req, res) {
                                                 tmpMsg += `K/D/A : ${item.kill}/${item.death}/${item.assist} (${((item.kill+item.assist)/(item.death === 0 ? 1/1.2 : item.death)).toFixed(2)})\n`
                                                 tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등`
 
-                                                content.addCardButton(`${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`,{ action: "message", messageText: "!결과", extra: {result_msg: tmpMsg} })
+                                                content.addCardButton(`${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`,{ action: "block", blockId: "'5fc6f55e42380f6fd47b4426', ", messageText: "!결과", extra: {result_msg: tmpMsg} })
         
                                             }
                                         })
