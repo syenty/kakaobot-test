@@ -39,9 +39,9 @@ apiRouter.post('/guide', function(req, res) {
     content = new kakaoEmbed
 
     content.addText("원하는 기능을 선택해주세요")
-    .addQuickReplies("티어 검색",{action: "message", messageText: "티어"})
-    .addQuickReplies("유저 관전",{action: "message", messageText: "관전"})
-    .addQuickReplies("전적 검색",{action: "message", messageText: "전적"})
+    .addQuickReplies("티어 검색",{action: "message", messageText: "!티어"})
+    .addQuickReplies("유저 관전",{action: "message", messageText: "!관전"})
+    .addQuickReplies("전적 검색",{action: "message", messageText: "!전적"})
 
     res.status(200).send(content.output())
     return
@@ -53,9 +53,9 @@ apiRouter.post('/fail', function(req, res) {
     content = new kakaoEmbed
 
     content.addText("현재 지원되는 기능들입니다")
-    .addQuickReplies("티어 검색",{action: "message", messageText: "티어"})
-    .addQuickReplies("유저 관전",{action: "message", messageText: "관전"})
-    .addQuickReplies("전적 검색",{action: "message", messageText: "전적"})
+    .addQuickReplies("티어 검색",{action: "message", messageText: "!티어"})
+    .addQuickReplies("유저 관전",{action: "message", messageText: "!관전"})
+    .addQuickReplies("전적 검색",{action: "message", messageText: "!전적"})
 
     res.status(200).send(content.output())
     return
@@ -538,9 +538,9 @@ apiRouter.post('/getRecord', function(req, res) {
                                                 tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등`
 
                                                 carouselItemObj = {}
-                                                carouselItemObj.title = `${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`
+                                                carouselItemObj.title = `${convertUtil.getQueueType(item.queueType)}`
                                                 carouselItemObj.description = "아래 버튼을 눌러 상세 결과를 조회해주세요"
-                                                carouselItemObj.buttons = [{action: "block", blockId: "'5fc6f55e42380f6fd47b4426', ", messageText: tmpMsg}]
+                                                carouselItemObj.buttons = [{label: `${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`, action: "block", blockId: "5fc6f55e42380f6fd47b4426", messageText: tmpMsg}]
 
                                                 carouselObj.items.push(carouselItemObj)
         
@@ -587,7 +587,7 @@ apiRouter.post('/getRecord', function(req, res) {
 
                         }
         
-                    },1500)
+                    },1000)
 
                 })
 
