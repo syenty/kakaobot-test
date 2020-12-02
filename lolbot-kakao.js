@@ -213,6 +213,7 @@ apiRouter.post('/getSpectator', function(req, res) {
                     let blue_obj = {teamId:100,isAlly:false,teamArr:[]}
                     let red_obj = {teamId:200,isAlly:false,teamArr:[]}
 
+                    tmpMsg = ""
                     tmpMsg += `${convertUtil.getQueueType(spectator_obj.gameQueueConfigId)} ${convertUtil.elapsedTimeFormatter(new Date().getTime()-spectator_obj.gameStartTime)} 진행중\n`
 
                     spectator_obj.participants.forEach(item => {
@@ -546,6 +547,7 @@ apiRouter.post('/getRecord', function(req, res) {
                                                 carouselItemObj.title = `${convertUtil.getQueueType(item.queueType)}`
                                                 carouselItemObj.description = "아래 버튼을 눌러 상세 결과를 조회해주세요"
                                                 carouselItemObj.buttons = [{label: `${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`, action: "block", blockId: "5fc6f55e42380f6fd47b4426", messageText: "!결과", extra: {extra_msg: tmpMsg}}]
+                                                carouselItemObj.thumbnail = { imageUrl: `http://ddragon.leagueoflegends.com/cdn/10.24.1/img/champion/${convertUtil.getChampionImage(convertUtil.getMaxSelectedChampionName(Object.entries(res)))}` }
 
                                                 carouselObj.items.push(carouselItemObj)
         
