@@ -64,12 +64,11 @@ apiRouter.post('/fail', function(req, res) {
 
 apiRouter.post('/getResult', function(req, res) {
 
+    console.log("===== getResult Test =====")
     console.log(req.body)
-
+    
     content = new kakaoEmbed
-
     content.addText("테스트 진행중")
-
     res.status(200).send(content.output())
     return
 
@@ -511,11 +510,11 @@ apiRouter.post('/getRecord', function(req, res) {
                                     if(count === 0){
 
                                         //console.log(objArr)
-                                        tmpMsg = ""
         
                                         objArr.forEach(item => {
                                             if(item.cnt > 0){
                                                 
+                                                tmpMsg = ""
                                                 tmpMsg += `${convertUtil.getQueueType(item.queueType)}\n`
                                                 tmpMsg += `${item.win}승 ${item.losses}패 (${Math.floor(100*item.win/(item.win+item.losses))}%)\n`
         
@@ -540,7 +539,7 @@ apiRouter.post('/getRecord', function(req, res) {
                                                 carouselItemObj = {}
                                                 carouselItemObj.title = `${convertUtil.getQueueType(item.queueType)}`
                                                 carouselItemObj.description = "아래 버튼을 눌러 상세 결과를 조회해주세요"
-                                                carouselItemObj.buttons = [{label: `${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`, action: "block", blockId: "5fc6f55e42380f6fd47b4426", messageText: tmpMsg}]
+                                                carouselItemObj.buttons = [{label: `${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`, action: "block", blockId: "5fc6f55e42380f6fd47b4426", messageText: tmpMsg, extra: {extra_msg: tmpMsg}}]
 
                                                 carouselObj.items.push(carouselItemObj)
         
@@ -587,7 +586,7 @@ apiRouter.post('/getRecord', function(req, res) {
 
                         }
         
-                    },1000)
+                    },1500)
 
                 })
 
