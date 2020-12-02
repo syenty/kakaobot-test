@@ -61,6 +61,19 @@ apiRouter.post('/fail', function(req, res) {
 
 })
 
+apiRouter.post('/getResult', function(req, res) {
+
+    console.log(req.body)
+
+    content = new kakaoEmbed
+
+    content.addText("테스트 진행중")
+
+    res.status(200).send(content.output())
+    return
+
+})
+
 apiRouter.post('/getTier', function(req, res) {
 
     const name = req.body.action.params.lol_name
@@ -509,7 +522,7 @@ apiRouter.post('/getRecord', function(req, res) {
                                         objArr.forEach(item => {
                                             if(item.cnt > 0){
                                                 
-                                                tmpMsg += `\n${convertUtil.getQueueType(item.queueType)}\n`
+                                                tmpMsg += `${convertUtil.getQueueType(item.queueType)}\n`
                                                 tmpMsg += `${item.win}승 ${item.losses}패 (${Math.floor(100*item.win/(item.win+item.losses))}%)\n`
         
                                                 // 사용한 챔피언
@@ -528,16 +541,12 @@ apiRouter.post('/getRecord', function(req, res) {
                                                 tmpMsg += `사용한 챔피언 : ${championLog}\n`
         
                                                 tmpMsg += `K/D/A : ${item.kill}/${item.death}/${item.assist} (${((item.kill+item.assist)/(item.death === 0 ? 1/1.2 : item.death)).toFixed(2)})\n`
-                                                tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등\n`
+                                                tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등`
 
-                                                content.addCardButton(`${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`,{action: "message", messageText: tmpMsg})
+                                                content.addCardButton(`${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`,{ action: "message", messageText: "!결과", extra: {result_msg: tmpMsg} })
         
                                             }
                                         })
-                                        
-                                        // content = new kakaoEmbed
-                                        // content.addText(tmpMsg)
-                                        // res.status(200).send(content.output())
 
                                         res.status(200).send(content.output())
                                         return
