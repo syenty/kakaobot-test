@@ -64,11 +64,11 @@ apiRouter.post('/fail', function(req, res) {
 
 apiRouter.post('/getResult', function(req, res) {
 
-    console.log("===== getResult Test =====")
-    console.log(req.body)
+    // console.log("===== getResult Test =====")
+    // console.log(req.body)
     
     content = new kakaoEmbed
-    content.addText("테스트 진행중")
+    content.addText(req.body.action.clientExtra.extra_msg)
     res.status(200).send(content.output())
     return
 
@@ -91,7 +91,13 @@ apiRouter.post('/getTier', function(req, res) {
 
     request(`${keys.riotUrl}/summoner/v4/summoners/by-name/${urlencode(name)}?api_key=${keys.riotAPI}`, (error, response, body) => {
 
-        if(error) throw error
+        // if(error) throw error
+        if(error) {
+            content = new kakaoEmbed
+            content.addText(autoMessage["bad-input"])
+            res.status(200).send(content.output())
+            return
+        }
 
         // 정상적인 입력시
         if(response.statusCode === 200){
@@ -539,7 +545,7 @@ apiRouter.post('/getRecord', function(req, res) {
                                                 carouselItemObj = {}
                                                 carouselItemObj.title = `${convertUtil.getQueueType(item.queueType)}`
                                                 carouselItemObj.description = "아래 버튼을 눌러 상세 결과를 조회해주세요"
-                                                carouselItemObj.buttons = [{label: `${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`, action: "block", blockId: "5fc6f55e42380f6fd47b4426", messageText: tmpMsg, extra: {extra_msg: tmpMsg}}]
+                                                carouselItemObj.buttons = [{label: `${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`, action: "block", blockId: "5fc6f55e42380f6fd47b4426", messageText: "!결과", extra: {extra_msg: tmpMsg}}]
 
                                                 carouselObj.items.push(carouselItemObj)
         
