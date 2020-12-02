@@ -20,6 +20,7 @@ const ConvertUtil = require('./lib/convertUtil')
 const convertUtil = new ConvertUtil
 
 let tmpMsg
+let carouselObj
 let content
 
 const apiRouter = express.Router()
@@ -285,6 +286,17 @@ apiRouter.post('/getRecord', function(req, res) {
         if(objectArr.length === 3){
             param2=objectArr[2]
         }
+
+        // carouselObj = {}
+        // carouselObj.type = "basicCard"
+        // carouselObj.items = []
+
+        content = new kakaoEmbed
+
+        content
+        .addBasicCard()
+        .setCardTitle(name)
+        .setCardDescription("아래 버튼을 눌러 상세 결과를 조회해주세요")
     
         request(`${keys.riotUrl}/summoner/v4/summoners/by-name/${urlencode(name)}?api_key=${keys.riotAPI}`, (error, response, body) => {
     
@@ -517,12 +529,16 @@ apiRouter.post('/getRecord', function(req, res) {
         
                                                 tmpMsg += `K/D/A : ${item.kill}/${item.death}/${item.assist} (${((item.kill+item.assist)/(item.death === 0 ? 1/1.2 : item.death)).toFixed(2)})\n`
                                                 tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등\n`
+
+                                                content.addCardButton(`${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`,{action: "message", messageText: tmpMsg})
         
                                             }
                                         })
                                         
-                                        content = new kakaoEmbed
-                                        content.addText(tmpMsg)
+                                        // content = new kakaoEmbed
+                                        // content.addText(tmpMsg)
+                                        // res.status(200).send(content.output())
+
                                         res.status(200).send(content.output())
                                         return
                                     }
