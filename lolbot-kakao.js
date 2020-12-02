@@ -21,6 +21,7 @@ const convertUtil = new ConvertUtil
 
 let tmpMsg
 let carouselObj
+let carouselItemObj
 let content
 
 const apiRouter = express.Router()
@@ -300,16 +301,9 @@ apiRouter.post('/getRecord', function(req, res) {
             param2=objectArr[2]
         }
 
-        // carouselObj = {}
-        // carouselObj.type = "basicCard"
-        // carouselObj.items = []
-
-        content = new kakaoEmbed
-
-        content
-        .addBasicCard()
-        .setCardTitle(name)
-        .setCardDescription("아래 버튼을 눌러 상세 결과를 조회해주세요")
+        carouselObj = {}
+        carouselObj.type = "basicCard"
+        carouselObj.items = []
     
         request(`${keys.riotUrl}/summoner/v4/summoners/by-name/${urlencode(name)}?api_key=${keys.riotAPI}`, (error, response, body) => {
     
@@ -543,11 +537,18 @@ apiRouter.post('/getRecord', function(req, res) {
                                                 tmpMsg += `K/D/A : ${item.kill}/${item.death}/${item.assist} (${((item.kill+item.assist)/(item.death === 0 ? 1/1.2 : item.death)).toFixed(2)})\n`
                                                 tmpMsg += `평균 딜량 순위 : 팀내 ${(item.damageInTeam/item.cnt).toFixed(1)}등 / 전체 ${(item.damageInAll/item.cnt).toFixed(1)}등`
 
-                                                content.addCardButton(`${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`,{ action: "block", blockId: "'5fc6f55e42380f6fd47b4426', ", messageText: "!결과", extra: {result_msg: tmpMsg} })
+                                                carouselItemObj = {}
+                                                carouselItemObj.title = `${convertUtil.getQueueType(item.queueType)} (${item.win+item.losses})`
+                                                carouselItemObj.description = "아래 버튼을 눌러 상세 결과를 조회해주세요"
+                                                carouselItemObj.buttons = [{action: "block", blockId: "'5fc6f55e42380f6fd47b4426', ", messageText: tmpMsg}]
+
+                                                carouselObj.items.push(carouselItemObj)
         
                                             }
                                         })
 
+                                        content = new kakaoEmbed
+                                        content.addCarousel(carouselObj)
                                         res.status(200).send(content.output())
                                         return
                                     }
