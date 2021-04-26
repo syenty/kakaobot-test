@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const logger = require('morgan')
 const bodyParser = require('body-parser')
+const axios = require('axios')
 
 // npm install request
 const request = require('request')
@@ -9,8 +10,10 @@ const request = require('request')
 const urlencode = require('urlencode')
 
 // require util json
-const keys = require("./keys.json")
+// const keys = require("./keys.json")
+let keys
 const autoMessage = require("./auto-message.json")
+const properties = require("./properties.json")
 
 const emblems = require("./json-lol/emblems.json")
 
@@ -608,6 +611,10 @@ apiRouter.post('/getRecord', function(req, res) {
 
 
 
-app.listen(59049,function(){
-  console.log('Connect 59049 port!')
+app.listen(59049, function(){
+    axios.get(`${properties.middleware}/kakao/lolbot.json`)
+    .then(res => {
+        keys = res.data
+    }).catch(err => console.log(err))
+    console.log('Connect 59049 port!')
 })
